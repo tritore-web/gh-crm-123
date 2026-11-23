@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* Tokens de design/tokens.json (solo modo claro). */
+@theme {
+  --color-app: #faf6ef;
+  --color-surface: #ffffff;
+  --color-line: #e6decf;
+  --color-line-strong: #8a7967;
+  --color-ink: #2b2118;
+  --color-ink-2: #6b5b4b;
+  --color-brown: #4a3426;
+  --color-sb-text: #f3e9dc;
+  --color-sb-text-2: #d9c7b3;
+  --color-sb-active: #5e4533;
+  --color-primary: #2f5d50;
+  --color-primary-hover: #264c41;
+  --color-primary-tint: #e5eeea;
+  --color-success: #2f7d5b;
+  --color-success-tint: #edf6f1;
+  --color-warning: #b7791f;
+  --color-warning-text: #8f5e14;
+  --color-warning-tint: #fbf1dc;
+  --color-danger: #b3402a;
+  --color-danger-tint: #f8e5e0;
+  --color-neutral-tint: #efe7da;
+  --color-row-hover: #fbf8f2;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --shadow-dialog: 0 8px 24px rgba(43, 33, 24, 0.16);
+  --shadow-sheet: 0 -4px 16px rgba(43, 33, 24, 0.14);
+  --spacing-sidebar: 232px;
+  --container-content: 1280px;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--color-app);
+  }
+  body {
+    margin: 0;
+    background: var(--color-app);
+    color: var(--color-ink);
+    font: 400 16px/24px var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Iconos de trazo fino (Lucide) */
+svg.i {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes crm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes crm-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: crm-spin 0.8s linear infinite;
+}
+.sk {
+  background: var(--color-neutral-tint);
+  border-radius: 4px;
+  height: 14px;
+  animation: crm-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .sk {
+    animation: none;
+  }
+}
