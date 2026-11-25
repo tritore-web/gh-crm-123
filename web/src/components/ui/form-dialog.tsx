@@ -19,11 +19,13 @@ type BodyProps = {
   intro?: ReactNode;
   onClose: () => void;
   onSuccess?: () => void;
+  /** Por defecto se refresca la pantalla al guardar. Un flujo de varios pasos lo pospone hasta el último. */
+  refreshOnSuccess?: boolean;
   secondary?: { label: string; onClick: () => void };
   children: (fieldErrors: FieldErrors) => ReactNode;
 };
 
-function Body({ action, hidden, newIdField, submitLabel, intro, onClose, onSuccess, secondary, children }: BodyProps) {
+function Body({ action, hidden, newIdField, submitLabel, intro, onClose, onSuccess, refreshOnSuccess = true, secondary, children }: BodyProps) {
   const router = useRouter();
   const [draftId] = useState(() => (newIdField ? crypto.randomUUID() : ''));
   const { submit, pending, fieldErrors, error, networkError } = useActionForm(action);
@@ -33,7 +35,7 @@ function Body({ action, hidden, newIdField, submitLabel, intro, onClose, onSucce
     last.current = formData;
     submit(formData, (result) => {
       if (!result.ok) return;
-      router.refresh();
+      if (refreshOnSuccess) router.refresh();
       if (onSuccess) onSuccess();
       else onClose();
     });

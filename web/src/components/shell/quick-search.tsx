@@ -91,7 +91,7 @@ export function QuickSearch() {
             go(hits[active]);
           }
         }}
-        className="h-8 w-full rounded-sm border border-line-strong bg-surface pr-8 pl-8 text-[14px] text-ink placeholder:text-ink-2"
+        className="h-8 w-full rounded-sm border border-line-strong bg-surface pr-7 pl-8 text-[14px] text-ink placeholder:text-ink-2"
       />
       <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-[4px] border border-line px-[5px] text-[11px] text-ink-2">/</span>
       {open && searched ? (

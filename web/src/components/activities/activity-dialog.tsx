@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, fieldAria } from '@/components/ui/field';
@@ -32,10 +33,18 @@ export function ActivityDialog({
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'default' | 'sm';
 }) {
+  const router = useRouter();
   const [step, setStep] = useState<'closed' | 'activity' | 'next'>('closed');
   // "Ahora" se calcula al abrir, en hora de Madrid, y no al cargar la página.
   const [now, setNow] = useState('');
   const close = () => setStep('closed');
+  // Al terminar el flujo se refresca la pantalla. Antes no: al guardar la primera actividad, el historial deja de estar
+  // vacío y el botón que contiene este diálogo se sustituye, lo que cortaría el segundo paso.
+  const finish = () => {
+    setStep('closed');
+    router.refresh();
+  };
+  const proposesNext = Boolean(suggestNextAction && opportunityId);
 
   return (
     <>
@@ -60,7 +69,8 @@ export function ActivityDialog({
         newIdField="id"
         hidden={{ customer_id: customerId, opportunity_id: opportunityId ?? '' }}
         submitLabel="Guardar"
-        onSuccess={() => (suggestNextAction && opportunityId ? setStep('next') : close())}
+        refreshOnSuccess={!proposesNext}
+        onSuccess={() => (proposesNext ? setStep('next') : close())}
       >
         {(errors) => (
           <>
@@ -88,12 +98,14 @@ export function ActivityDialog({
       {opportunityId ? (
         <FormDialog
           open={step === 'next'}
-          onClose={close}
+          onClose={finish}
           title="Actividad guardada"
           action={setNextAction}
           hidden={{ id: opportunityId }}
           submitLabel="Guardar acción"
-          secondary={{ label: 'Dejar sin acción', onClick: close }}
+          onSuccess={finish}
+          refreshOnSuccess={false}
+          secondary={{ label: 'Dejar sin acción', onClick: finish }}
           intro={<p className="m-0 text-ink-2">¿Cuál es la siguiente acción de esta oportunidad?</p>}
         >
           {(errors) => <NextActionFields errors={errors} />}

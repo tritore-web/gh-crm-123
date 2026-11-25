@@ -18,20 +18,31 @@ export function Dialog({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const closedByCode = useRef(false);
   const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
+    if (!open && dialog.open) {
+      closedByCode.current = true; // el evento "close" de este cierre no debe avisar al padre
+      dialog.close();
+    }
   }, [open]);
 
   return (
     <dialog
       ref={ref}
       aria-labelledby={titleId}
-      onClose={onClose}
+      onClose={() => {
+        // Solo avisa cuando el cierre lo provoca la persona (tecla Esc); no cuando lo hace el propio código.
+        if (closedByCode.current) {
+          closedByCode.current = false;
+          return;
+        }
+        onClose();
+      }}
       className="m-auto w-[460px] max-w-[calc(100vw-32px)] rounded-md border border-line bg-surface p-5 text-ink shadow-dialog"
     >
       {open ? (
