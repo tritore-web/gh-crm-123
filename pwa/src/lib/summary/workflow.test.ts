@@ -18,7 +18,9 @@ describe('WF-CRM123.json', () => {
     expect(wf.active).toBe(false);
   });
   it('planifica de lunes a viernes a las 7:30', () => {
-    expect(JSON.stringify(byName('Lunes a viernes 7:30')?.parameters)).toContain('30 7 * * 1-5');
+    const interval = (byName('Lunes a viernes 7:30')?.parameters as { rule?: { interval?: { field?: string; expression?: string }[] } }).rule?.interval?.[0];
+    // n8n solo entiende el tipo «cronExpression»; con otro nombre falla al activar («Unknown alias: und»).
+    expect(interval).toEqual({ field: 'cronExpression', expression: '30 7 * * 1-5' });
   });
   it('el disparo manual es un webhook POST con autenticación de cabecera', () => {
     const webhook = byName('Disparo manual');
