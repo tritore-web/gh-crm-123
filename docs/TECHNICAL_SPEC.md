@@ -66,7 +66,7 @@ Versiones: la última estable compatible al iniciar el Hito 2, fijadas por el ar
 
 ## 4. Estructura del repositorio
 
-Rama única de fuentes: **`gh-crm-123`**.
+Rama de producción: **`main`**. Claude Code Web trabaja en una rama de sesión (`claude/…`) y cada hito llega a `main` con un Pull Request que fusiona el humano.
 
 ```
 / (raíz)
@@ -419,9 +419,9 @@ Los valores reales **nunca** se guardan en GitHub. Cada aplicación tiene un `.e
 
 ## 14. Despliegue (manual)
 
-- GitHub guarda el código en la rama `gh-crm-123`. Dos proyectos de Vercel conectados al repositorio, con *Root Directory* `web` y `pwa` respectivamente.
+- GitHub guarda el código; la rama de producción es `main`. Dos proyectos de Vercel conectados al repositorio, con *Root Directory* `web` y `pwa` respectivamente.
 - Para que **ningún** push despliegue solo, cada carpeta lleva `vercel.json` con `{"git": {"deploymentEnabled": false}}`.
-- Cada despliegue lo inicia el humano con el **Deploy Hook** de su proyecto (Vercel › Settings › Git › Deploy Hooks, rama `gh-crm-123`), que acepta una petición HTTP. Claude Code Web **nunca** despliega.
+- Cada despliegue lo inicia el humano con el **Deploy Hook** de su proyecto (Vercel › Settings › Git › Deploy Hooks, rama `main`), que acepta una petición HTTP. Claude Code Web **nunca** despliega.
 - En el Hito 2 se **verifica** que el Deploy Hook funciona con `deploymentEnabled: false`. Si Vercel lo bloqueara, se informa al humano y se acuerda una alternativa antes de continuar.
 
 ---

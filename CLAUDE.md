@@ -25,7 +25,7 @@ El humano **no tiene perfil técnico**. Háblale en español, en lenguaje de neg
 | Elemento | Valor |
 |---|---|
 | Nombre de marca | **CRM-123** |
-| Rama de fuentes | **`gh-crm-123`** (única rama de trabajo) |
+| Rama de producción | **`main`** (Vercel despliega desde ella; el trabajo de Claude Code Web llega aquí con un Pull Request por hito) |
 | Carpetas | `web/` (sitio de escritorio) y `pwa/` (PWA del supervisor) |
 | Proyecto de Supabase | **`dbcrm123`**, organización **Org CRM 123**, región UE |
 | Flujo de n8n | **`WF-CRM123`** (archivo `pwa/n8n/WF-CRM123.json`) |
@@ -128,7 +128,7 @@ Ante cualquier ambigüedad que cambie lo que se construye: pregunta (una pregunt
 
 ## 8. Git y despliegue
 
-- Trabaja **solo** en la rama `gh-crm-123`. No crear otras ramas, no reescribir historial, no `push --force`.
+- Trabaja **solo** en la rama de sesión que asigna el entorno (`claude/…`) y **nunca subas directamente a `main`**: el humano fusiona cada hito en `main` con un Pull Request. No crear otras ramas, no reescribir historial, no `push --force`.
 - Commits pequeños y con sentido, con mensajes en español en imperativo (por ejemplo, "Añade el ingreso con correo y contraseña").
 - Nunca comitear `.env*` con valores, claves, tokens ni exportaciones de datos reales.
 - **No despliegues.** El despliegue a Vercel lo hace el humano de forma manual (Deploy Hook de cada proyecto). Cada carpeta lleva `vercel.json` con `{"git": {"deploymentEnabled": false}}`. En cada hito, entrega el procedimiento de despliegue y la lista de variables que deben existir en Vercel.
