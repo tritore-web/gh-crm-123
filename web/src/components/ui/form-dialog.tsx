@@ -18,7 +18,7 @@ type BodyProps = {
   submitLabel: string;
   intro?: ReactNode;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (result: object) => void;
   /** Por defecto se refresca la pantalla al guardar. Un flujo de varios pasos lo pospone hasta el último. */
   refreshOnSuccess?: boolean;
   secondary?: { label: string; onClick: () => void };
@@ -36,7 +36,7 @@ function Body({ action, hidden, newIdField, submitLabel, intro, onClose, onSucce
     submit(formData, (result) => {
       if (!result.ok) return;
       if (refreshOnSuccess) router.refresh();
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(result);
       else onClose();
     });
   };

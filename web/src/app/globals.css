@@ -209,6 +209,7 @@ svg.i {
   .tag.s-negociacion { background: #dccdb5; }
   .tag.won { background: var(--color-success-tint); color: var(--color-success); }
   .tag.lost { background: var(--color-danger-tint); color: var(--color-danger); }
+  .tag.warn { background: var(--color-warning-tint); color: var(--color-warning-text); }
   .tag.type { background: transparent; border: 1px solid var(--color-line-strong); color: var(--color-ink-2); }
   .steps {
     display: flex;
