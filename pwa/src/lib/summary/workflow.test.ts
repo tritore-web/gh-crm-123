@@ -44,6 +44,8 @@ describe('WF-CRM123.json', () => {
     const send = byName('Enviar con Resend');
     expect(send?.parameters.url).toBe('https://api.resend.com/emails');
     expect(send?.credentials?.httpHeaderAuth.name).toBe('Resend API');
+    // El remitente se lee del contenido de la PWA, no del elemento del bucle (Resend responde 422 «Missing from» si llega vacío).
+    expect(String(send?.parameters.jsonBody)).toContain("from: $('Obtener contenido').first().json.from");
     expect(send?.onError).toBe('continueRegularOutput');
   });
   it('envía de uno en uno con una pausa de 1 segundo (límite de Resend)', () => {

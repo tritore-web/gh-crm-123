@@ -312,7 +312,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ from: $json.from, to: [$json.to], subject: $json.subject, html: $json.html, text: $json.text }) }}",
+        "jsonBody": "={{ JSON.stringify({ from: $('Obtener contenido').first().json.from, to: [$json.to], subject: $json.subject, html: $json.html, text: $json.text }) }}",
         "options": {}
       },
       "id": "1313c082-31b9-5d4d-942e-58d9fe7a9e0b",
