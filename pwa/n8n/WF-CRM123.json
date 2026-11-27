@@ -1,0 +1,666 @@
+{
+  "name": "WF-CRM123",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "df0ce7e4-2b6c-5af6-b5b5-e27e35f3ba77",
+      "name": "Lunes a viernes 7:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm123-resumen-manual",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cb3b745e-1a98-5475-aca2-f4ce773e8241",
+      "name": "Disparo manual",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        220
+      ],
+      "webhookId": "c5924972-88c0-5564-830a-f21a0d1acfdd",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR",
+          "name": "CRM123 Webhook Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77b714a7-1315-5b65-a36c-d936e593f800",
+              "name": "origen",
+              "value": "automatico",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd336900-9190-5443-b1d7-c76edf61c6b6",
+      "name": "Origen automático",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77338023-4c23-5a7d-946a-7b5db579ea01",
+              "name": "origen",
+              "value": "manual",
+              "type": "string"
+            },
+            {
+              "id": "32fbd871-d804-5d06-ae46-60368243eb07",
+              "name": "run_id",
+              "value": "={{ $json.body.run_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d868cd7-de83-5008-9d50-22688e8c1bad",
+      "name": "Origen manual",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "263372d1-809a-5560-819f-86a62474ebfd",
+              "name": "app_base_url",
+              "value": "https://REEMPLAZAR-con-la-direccion-de-crm-123-pwa.vercel.app",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {},
+        "includeOtherFields": true
+      },
+      "id": "a95c7483-1f75-5375-b7b7-e56702e6529b",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        520,
+        110
+      ],
+      "notes": "ÚNICO lugar con la dirección de la PWA (la misma que APP_ORIGIN, sin barra final). Edítala tras importar.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "04466272-ad02-5dae-92f1-08fb8e7f0539",
+              "leftValue": "={{ $json.origen }}",
+              "rightValue": "automatico",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "43793bd0-44e2-5ae1-a711-991025edd866",
+      "name": "¿Es automático?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.app_base_url }}/api/n8n/runs/start",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"trigger\":\"automatico\"}",
+        "options": {}
+      },
+      "id": "1661c2a3-8e53-55f7-b42c-66589b257d6f",
+      "name": "Iniciar ejecución",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR",
+          "name": "CRM123 API Secret"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a90e3334-d504-5c0d-a276-ba036c4da8b1",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2a4b429b-4858-50e0-892d-e41ce1d1fab8",
+      "name": "¿Omitir?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "61ce1842-de8a-53ee-9aa5-1b6371cda9fd",
+      "name": "Fin (omitido)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ad9dce91-857b-505d-b350-c9a8fe9bfced",
+              "name": "run_id",
+              "value": "={{ $json.run_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b45b455c-4456-5ad2-a198-cba33a9974e2",
+      "name": "Preparar ejecución",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.app_base_url }}/api/n8n/runs/{{ $json.run_id }}/payload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "4fe7b873-73b8-52c5-bbf2-71644ce9a08e",
+      "name": "Obtener contenido",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        110
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR",
+          "name": "CRM123 API Secret"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "recipients",
+        "options": {
+          "include": "allOtherFields"
+        }
+      },
+      "id": "86129b48-265c-5bb1-a571-c2a9f4df379f",
+      "name": "Separar destinatarios",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        30
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "caefa93f-a53b-522c-b6f4-009a44cf9614",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2340,
+        30
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: $json.from, to: [$json.to], subject: $json.subject, html: $json.html, text: $json.text }) }}",
+        "options": {}
+      },
+      "id": "1313c082-31b9-5d4d-942e-58d9fe7a9e0b",
+      "name": "Enviar con Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2600,
+        110
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR",
+          "name": "Resend API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90a6beb2-0c5d-5c7f-b1dc-03a0cfc9dfb5",
+              "name": "to",
+              "value": "={{ $('Loop Over Items').item.json.to }}",
+              "type": "string"
+            },
+            {
+              "id": "585454a4-682c-5cf8-b863-981c727da314",
+              "name": "ok",
+              "value": "={{ !$json.error && !!$json.id }}",
+              "type": "boolean"
+            },
+            {
+              "id": "3a76f0b2-dd1b-51d5-b6fe-a31f68fa1c8d",
+              "name": "message",
+              "value": "={{ $json.error ? String($json.error.message || $json.error).slice(0, 200) : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "db77d850-0195-5369-9bb5-59e56e7ae4e4",
+      "name": "Marcar resultado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2860,
+        110
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "a7a03cba-2038-5e33-bf78-ddca5b170e22",
+      "name": "Esperar 1 s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3120,
+        110
+      ],
+      "webhookId": "895ed952-3830-5cfc-a1b9-915469ba46f7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cuenta enviados y fallidos de todos los correos. Sin lógica de negocio: solo el recuento.\nconst items = $input.all();\nconst sent = items.filter((i) => i.json.ok === true).length;\nconst failedItems = items.filter((i) => i.json.ok !== true);\nconst errors = failedItems.slice(0, 12).map((i) => ({\n  to: String(i.json.to || '-').slice(0, 200),\n  message: String(i.json.message || 'Error al enviar').slice(0, 200),\n}));\nreturn [{ json: { sent, failed: failedItems.length, errors } }];"
+      },
+      "id": "0d8ec472-b60f-5d10-83ee-f54a33410e49",
+      "name": "Contar resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No se pudo obtener el contenido: se informa de que no se envió nada.\nreturn [{ json: { sent: 0, failed: 0, errors: [{ to: '-', message: 'No se pudo obtener el contenido' }] } }];"
+      },
+      "id": "86a597bb-6367-5038-97cb-d4ef471ae469",
+      "name": "Sin contenido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.app_base_url }}/api/n8n/runs/{{ $('Preparar ejecución').first().json.run_id }}/finish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ sent: $json.sent, failed: $json.failed, errors: $json.errors }) }}",
+        "options": {}
+      },
+      "id": "b1f81207-8aec-5be6-81b5-26944b2aad4b",
+      "name": "Informar resultado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2900,
+        -120
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR",
+          "name": "CRM123 API Secret"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Lunes a viernes 7:30": {
+      "main": [
+        [
+          {
+            "node": "Origen automático",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparo manual": {
+      "main": [
+        [
+          {
+            "node": "Origen manual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Origen automático": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Origen manual": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "¿Es automático?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es automático?": {
+      "main": [
+        [
+          {
+            "node": "Iniciar ejecución",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar ejecución",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar ejecución": {
+      "main": [
+        [
+          {
+            "node": "¿Omitir?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Omitir?": {
+      "main": [
+        [
+          {
+            "node": "Fin (omitido)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar ejecución",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar ejecución": {
+      "main": [
+        [
+          {
+            "node": "Obtener contenido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener contenido": {
+      "main": [
+        [
+          {
+            "node": "Separar destinatarios",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sin contenido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar destinatarios": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Contar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar con Resend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar con Resend": {
+      "main": [
+        [
+          {
+            "node": "Marcar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar resultado": {
+      "main": [
+        [
+          {
+            "node": "Esperar 1 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperar 1 s": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contar resultado": {
+      "main": [
+        [
+          {
+            "node": "Informar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sin contenido": {
+      "main": [
+        [
+          {
+            "node": "Informar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Madrid"
+  },
+  "versionId": "7830db0b-35be-5182-a2c8-3cbb6066e288",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "2a02f381-1bf5-5503-99df-7315ab50e6ee",
+  "tags": []
+}

@@ -6,7 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const APP = 'web';
-const CURRENT_HITO = 2; // Se sube en cada hito; solo se exigen las variables con since <= CURRENT_HITO.
+const CURRENT_HITO = 4; // Se sube en cada hito; solo se exigen las variables con since <= CURRENT_HITO.
 
 const VARIABLES = [
   { name: 'NEXT_PUBLIC_SUPABASE_URL', since: 2, secret: false, check: (v) => /^https:\/\/[^\s/]+/.test(v), hint: 'debe empezar por https://' },

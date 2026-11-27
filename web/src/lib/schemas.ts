@@ -163,3 +163,28 @@ export const activitySchema = z.object({
 
 export const idSchema = z.object({ id: uuid('Identificador no válido.') });
 export const ownerSchema = z.object({ id: uuid('Identificador no válido.'), owner_id: uuid('Elige un vendedor.') });
+
+export const userCreateSchema = z.object({
+  full_name: text(120, 'El nombre es demasiado largo.').min(2, 'Escribe el nombre completo.'),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(200, 'Escribe un correo válido.')
+    .refine((v) => EMAIL.test(v), 'Escribe un correo válido.'),
+  role: z.enum(['vendedor', 'supervisor'], { error: 'Elige el rol.' }),
+});
+
+export const userActiveSchema = z.object({
+  id: uuid('Identificador no válido.'),
+  active: z.enum(['true', 'false']).transform((v) => v === 'true'),
+});
+
+const MAX_BULK_CUSTOMERS = 2000;
+export const bulkReassignSchema = z
+  .object({
+    origin_id: uuid('Elige el vendedor de origen.'),
+    dest_id: uuid('Elige el vendedor de destino.'),
+    customer_ids: z.array(uuid('Cliente no válido.')).min(1, 'Elige al menos un cliente.').max(MAX_BULK_CUSTOMERS, 'Son demasiados clientes a la vez.'),
+  })
+  .refine((v) => v.origin_id !== v.dest_id, { path: ['dest_id'], message: 'El destino debe ser otro vendedor.' });

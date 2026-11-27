@@ -54,9 +54,12 @@ export async function signIn(_prev: FormState, formData: FormData): Promise<Form
   redirect(profile.mustChangePassword ? '/cambiar-contrasena' : safeNextPath(formData.get('siguiente')));
 }
 
-export async function changePassword(_prev: FormState, formData: FormData): Promise<FormState> {
+const WEAK_PASSWORD = 'Usa al menos 10 caracteres, con letras y números.';
+
+/** Valida y guarda la contraseña nueva. Devuelve un error de formulario, o null si se guardó. */
+async function applyNewPassword(formData: FormData): Promise<FormState | null> {
   const parsed = passwordSchema.safeParse({ password: formData.get('password'), confirm: formData.get('confirm') });
-  if (!parsed.success) return { error: 'Usa al menos 10 caracteres, con letras y números.' };
+  if (!parsed.success) return { error: WEAK_PASSWORD };
 
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -64,12 +67,20 @@ export async function changePassword(_prev: FormState, formData: FormData): Prom
 
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) {
-    if (error.code === 'weak_password') return { error: 'Usa al menos 10 caracteres, con letras y números.' };
+    if (error.code === 'weak_password') return { error: WEAK_PASSWORD };
     if (error.code === 'same_password') return { error: 'Elige una contraseña distinta de la actual.' };
     console.error('[changePassword] fallo al guardar', { code: error.code ?? 'desconocido' });
     return { error: MESSAGES.generic };
   }
+  return null;
+}
 
+/** Cambio obligatorio del primer ingreso: además marca el cambio hecho en el perfil. */
+export async function changePassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  const failure = await applyNewPassword(formData);
+  if (failure) return failure;
+
+  const supabase = await createClient();
   // La contraseña ya cambió; se marca en el perfil (un reintento cubre un fallo puntual).
   let marked = await supabase.rpc('mark_password_changed');
   if (marked.error) marked = await supabase.rpc('mark_password_changed');
@@ -77,8 +88,14 @@ export async function changePassword(_prev: FormState, formData: FormData): Prom
     console.error('[changePassword] no se pudo marcar el cambio', { code: marked.error.code ?? 'desconocido' });
     return { error: MESSAGES.generic };
   }
-
   redirect('/');
+}
+
+/** Cambio voluntario desde Cuenta. */
+export async function changeOwnPassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  const failure = await applyNewPassword(formData);
+  if (failure) return failure;
+  redirect('/cuenta?cambio=ok');
 }
 
 export async function signOut(): Promise<void> {
