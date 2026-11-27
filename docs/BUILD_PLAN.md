@@ -24,7 +24,7 @@
 | Servicio | Qué se necesita | Cuándo |
 |---|---|---|
 | **Supabase** | Organización **Org CRM 123** | Hito 1 |
-| **GitHub** | Repositorio del proyecto (rama `gh-crm-123`) | Hito 2 |
+| **GitHub** | Repositorio del proyecto (rama de producción `main`) | Hito 2 |
 | **Vercel** | Cuenta conectada a GitHub | Hito 2 |
 | **Resend** | Cuenta (anota con qué correo la creas) | Hito 4 |
 | **n8n Cloud** | Cuenta (tiene periodo de prueba; comprueba el plan vigente antes de depender del flujo) | Hito 4 |
@@ -144,7 +144,7 @@ V01 17/17, T01 53/53, T02 43/43, P1–P5 correctas, avisos reportados, `database
 ## 3. Hito 2 — Entrar y desplegar
 
 **Qué construye** (solo esto): **el ingreso, el armazón de navegación y el tablero del día vacío**, en las dos aplicaciones, y su despliegue.
-**Quién:** Claude Code Web, sobre la rama `gh-crm-123`. **Antes de empezar**, el humano ha confirmado el Hito 1.
+**Quién:** Claude Code Web, en una rama de sesión que el humano fusiona en `main` con un Pull Request. **Antes de empezar**, el humano ha confirmado el Hito 1.
 
 ### 3.1 Variables de entorno (inicio del hito)
 1. Informa la tabla de la sección 1.1 y la de 1.2.
@@ -171,13 +171,13 @@ V01 17/17, T01 53/53, T02 43/43, P1–P5 correctas, avisos reportados, `database
 **Una sola vez por aplicación** (repetir para `web` y `pwa`):
 1. Vercel › **Add New…** › **Project** › importa el repositorio de GitHub.
 2. **Project Name:** `crm-123-web` (o `crm-123-pwa`). **Root Directory:** `web` (o `pwa`). **Framework Preset:** Next.js.
-3. Vercel › proyecto › **Settings** › **Git** › **Production Branch:** `gh-crm-123`.
+3. Vercel › proyecto › **Settings** › **Git** › **Production Branch:** `main`.
 4. Vercel › **Settings** › **Environment Variables:** crea las variables de la sección 1.2 para el hito (entorno *Production*). Marca `SUPABASE_SERVICE_ROLE_KEY` como **Sensitive**.
-5. Vercel › **Settings** › **Git** › **Deploy Hooks:** crea uno llamado `manual`, rama `gh-crm-123`, y **guarda su dirección** en un lugar privado (es la llave para desplegar).
+5. Vercel › **Settings** › **Git** › **Deploy Hooks:** crea uno llamado `manual`, rama `main`, y **guarda su dirección** en un lugar privado (es la llave para desplegar).
 6. Para **desplegar**: abre la dirección del Hook (pegándola en el navegador, o con `curl -X POST <dirección>`). Vercel › **Deployments**: espera el estado **Ready**.
 7. Supabase › **Authentication › URL Configuration**: **Site URL** = dirección de `crm-123-web`; en **Redirect URLs** añade la de `crm-123-pwa`.
 
-**Cada despliegue posterior** (hitos 3 y 4): Claude Code sube los cambios a `gh-crm-123`; el humano abre el Deploy Hook de la aplicación modificada.
+**Cada despliegue posterior** (hitos 3 y 4): Claude Code sube los cambios a su rama de sesión; el humano los fusiona en `main` con un Pull Request y abre el Deploy Hook de la aplicación modificada.
 
 ### 3.4 AVISO AL HUMANO: variables a crear o actualizar (antes de las pruebas)
 Claude Code entrega la lista exacta de lo que falta en cada proyecto de Vercel (comparando con 1.2) y **espera confirmación** de que está lista y de que el despliegue terminó en **Ready**.
@@ -188,7 +188,7 @@ Claude Code entrega la lista exacta de lo que falta en cada proyecto de Vercel (
 |---|---|---|
 | 1 | Verificaciones locales: `check:security`, `lint`, `typecheck`, `test`, `build` en `web/` y `pwa/` | Todo en verde |
 | 2 | `check-env` en `web/` y `pwa/` | Todas las variables del hito presentes |
-| 3 | Un **push** a `gh-crm-123` | **No** inicia ningún despliegue por sí solo |
+| 3 | Un **push** o la fusión de un Pull Request en `main` | **No** inicia ningún despliegue por sí solo |
 | 4 | Abrir el Deploy Hook de cada aplicación | Despliegue **Ready**; las dos URL abren |
 | 5 | Ingresar en `web` con el supervisor y la contraseña temporal | Pide cambiar contraseña; con una de menos de 10 caracteres o sin números, la rechaza |
 | 6 | Completar el cambio de contraseña | Entra al tablero vacío; al volver a ingresar ya no pide cambio |
@@ -227,7 +227,7 @@ Informa de nuevo las secciones 1.1 y 1.2, indica que **este hito no requiere var
 - Pruebas unitarias de las operaciones de cierre y reapertura y del traductor de errores.
 
 ### 4.3 Procedimiento de despliegue en Vercel
-Claude Code sube el trabajo a `gh-crm-123`. El humano abre el **Deploy Hook de `crm-123-web`** (3.3, paso 6) y espera **Ready**. `crm-123-pwa` no cambia y no se redespliega.
+Claude Code sube el trabajo a su rama de sesión. El humano lo fusiona en `main` con un Pull Request, abre el **Deploy Hook de `crm-123-web`** (3.3, paso 6) y espera **Ready**. `crm-123-pwa` no cambia y no se redespliega.
 
 ### 4.4 AVISO AL HUMANO (antes de las pruebas)
 Variables nuevas: **ninguna**. Claude Code lo confirma tras ejecutar `check-env`. Recuerda al humano que, para probar el aislamiento entre vendedores, necesita **dos vendedores de prueba con contraseña ya cambiada** (los del Hito 1) y el supervisor.
