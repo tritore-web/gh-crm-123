@@ -110,6 +110,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|js)$).*)',
+    // /api/* queda fuera: cada endpoint valida por su cuenta (n8n con Bearer; el envío manual con sesión) y responde 401/403, no redirige.
+    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|js)$).*)',
   ],
 };

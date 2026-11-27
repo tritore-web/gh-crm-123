@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { checkPassword, isStrongPassword } from '@/lib/password';
 import { cn } from '@/lib/utils';
 import { PasswordInput } from '../password-input';
-import { changePassword, signOut, type FormState } from '../actions';
+import { changeOwnPassword, changePassword, signOut, type FormState } from '../actions';
 
 const initialState: FormState = {};
 
@@ -22,8 +22,9 @@ function Requirement({ met, children }: { met: boolean; children: string }) {
   );
 }
 
-export function PasswordForm() {
-  const [state, formAction, pending] = useActionState(changePassword, initialState);
+/** `forced`: primer ingreso (se puede cerrar sesión). `voluntary`: desde Cuenta (se vuelve a Cuenta). */
+export function PasswordForm({ mode = 'forced' }: { mode?: 'forced' | 'voluntary' }) {
+  const [state, formAction, pending] = useActionState(mode === 'forced' ? changePassword : changeOwnPassword, initialState);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
 
@@ -87,12 +88,14 @@ export function PasswordForm() {
           )}
         </Button>
       </form>
-      <form action={signOut}>
-        <button type="submit" className="flex min-h-11 items-center gap-2 text-ink-2 hover:text-ink">
-          <LogOut className="i" size={16} aria-hidden="true" />
-          Cerrar sesión
-        </button>
-      </form>
+      {mode === 'forced' ? (
+        <form action={signOut}>
+          <button type="submit" className="flex min-h-11 items-center gap-2 text-ink-2 hover:text-ink">
+            <LogOut className="i" size={16} aria-hidden="true" />
+            Cerrar sesión
+          </button>
+        </form>
+      ) : null}
     </>
   );
 }
