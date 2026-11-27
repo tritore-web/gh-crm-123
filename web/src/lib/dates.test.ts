@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysBetween, formatDate, formatDateTime, overdueLabel, weekdayName } from './dates';
+import { daysBetween, formatDate, formatDateTime, formatInstantDate, isValidIsoDate, localInputToIso, overdueLabel, toLocalInput, weekdayName } from './dates';
 
 describe('formatDate', () => {
   it('muestra dd/mm/aaaa', () => {
@@ -40,5 +40,35 @@ describe('daysBetween / overdueLabel', () => {
   it('usa singular y plural', () => {
     expect(overdueLabel(1)).toBe('Atrasada · 1 día');
     expect(overdueLabel(3)).toBe('Atrasada · 3 días');
+  });
+});
+
+describe('formatInstantDate', () => {
+  it('da la fecha en la zona de Madrid', () => {
+    expect(formatInstantDate('2026-11-23T23:30:00Z')).toBe('24/11/2026');
+    expect(formatInstantDate('2026-11-23T12:00:00Z')).toBe('23/11/2026');
+    expect(formatInstantDate('x')).toBe('');
+  });
+});
+
+describe('campos de fecha y hora (hora de Madrid)', () => {
+  it('toLocalInput y localInputToIso son inversos, en invierno y en verano', () => {
+    expect(toLocalInput(new Date('2026-11-23T08:12:00Z'))).toBe('2026-11-23T09:12');
+    expect(localInputToIso('2026-11-23T09:12')).toBe('2026-11-23T08:12:00.000Z');
+    expect(localInputToIso('2026-07-01T00:30')).toBe('2026-06-30T22:30:00.000Z');
+  });
+  it('rechaza formatos inválidos y horas que no existen (salto de horario)', () => {
+    expect(localInputToIso('23/11/2026 09:12')).toBeNull();
+    expect(localInputToIso('')).toBeNull();
+    expect(localInputToIso('2026-03-29T02:30')).toBeNull();
+  });
+});
+
+describe('isValidIsoDate', () => {
+  it('acepta fechas reales y rechaza las imposibles', () => {
+    expect(isValidIsoDate('2026-02-28')).toBe(true);
+    expect(isValidIsoDate('2026-02-30')).toBe(false);
+    expect(isValidIsoDate('2026-13-01')).toBe(false);
+    expect(isValidIsoDate('')).toBe(false);
   });
 });

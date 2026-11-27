@@ -16,8 +16,8 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/auditoria', label: 'Auditoría', icon: ListChecks },
 ];
 
-/** Título de la barra superior según la ruta. */
-export const PAGE_TITLES: Record<string, string> = {
+/** Título de la barra superior según la ruta (DESIGN_BRIEF §5.2). */
+const EXACT_TITLES: Record<string, string> = {
   '/': 'Tablero',
   '/clientes': 'Clientes',
   '/clientes/nuevo': 'Nuevo cliente',
@@ -28,3 +28,13 @@ export const PAGE_TITLES: Record<string, string> = {
   '/admin/reasignar': 'Reasignar',
   '/admin/auditoria': 'Auditoría',
 };
+
+export function titleFor(pathname: string): string {
+  const exact = EXACT_TITLES[pathname];
+  if (exact) return exact;
+  if (/^\/clientes\/[^/]+\/editar$/.test(pathname)) return 'Editar cliente';
+  if (/^\/clientes\/[^/]+$/.test(pathname)) return 'Cliente';
+  if (/^\/oportunidades\/[^/]+\/editar$/.test(pathname)) return 'Editar oportunidad';
+  if (/^\/oportunidades\/[^/]+$/.test(pathname)) return 'Oportunidad';
+  return '';
+}

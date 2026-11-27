@@ -52,3 +52,49 @@ export function daysBetween(fromIso: string, toIso: string): number {
 export function overdueLabel(days: number): string {
   return `Atrasada · ${days} ${days === 1 ? 'día' : 'días'}`;
 }
+
+/** Instante ISO → `23/11/2026` (solo la fecha, en la zona de la aplicación). */
+export function formatInstantDate(isoInstant: string, timeZone: string = APP_TIME_ZONE): string {
+  const date = new Date(isoInstant);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('es-ES', { timeZone, day: '2-digit', month: '2-digit', year: 'numeric' }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${get('day')}/${get('month')}/${get('year')}`;
+}
+
+/** Instante → `2026-11-23T09:12` en la zona de la aplicación (valor de un campo "fecha y hora"). */
+export function toLocalInput(instant: Date, timeZone: string = APP_TIME_ZONE): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(instant);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
+
+/** `2026-11-23T09:12` (hora de Madrid) → instante ISO en UTC. Devuelve null si no es válido. */
+export function localInputToIso(local: string, timeZone: string = APP_TIME_ZONE): string | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(local);
+  if (!match) return null;
+  const [y, mo, d, h, mi] = match.slice(1).map(Number);
+  const asUtc = Date.UTC(y, mo - 1, d, h, mi);
+  // La diferencia entre la hora de pared y UTC en ese instante da el desplazamiento de la zona (maneja horario de verano).
+  let guess = asUtc;
+  for (let i = 0; i < 2; i += 1) {
+    const shown = toLocalInput(new Date(guess), timeZone);
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(shown);
+    if (!m) return null;
+    const wall = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]));
+    guess += asUtc - wall;
+  }
+  const result = new Date(guess);
+  if (toLocalInput(result, timeZone) !== local) return null; // hora que no existe (salto de horario de verano)
+  return result.toISOString();
+}
+
+/** `2026-11-23` es una fecha de calendario válida (rechaza 2026-02-30). */
+export function isValidIsoDate(iso: string): boolean {
+  const parts = parseIsoDate(iso);
+  if (!parts) return false;
+  const date = new Date(Date.UTC(parts.y, parts.m - 1, parts.d));
+  return date.getUTCFullYear() === parts.y && date.getUTCMonth() === parts.m - 1 && date.getUTCDate() === parts.d;
+}
